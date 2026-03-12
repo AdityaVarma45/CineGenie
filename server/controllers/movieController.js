@@ -1,4 +1,5 @@
 import { fetchMovies } from "../services/tmdbService.js";
+import { generateMovieInsights } from "../services/aiService.js";
 import { genreMap } from "../utils/genreMap.js";
 
 export const getMovies = async (req, res) => {
@@ -14,32 +15,34 @@ export const getMovies = async (req, res) => {
 
     const genreId = genreMap[genre.toLowerCase()];
 
-    if (!genreId) {
-      return res.status(400).json({
-        message: "Invalid genre"
-      });
-    }
-
     const movies = await fetchMovies({
       genreId,
       language,
       year
     });
 
-    res.json({
-      total: movies.length,
-      movies
+    const firstFive = movies.slice(0, 5);
+
+    let aiExplanation = "AI explanation unavailable";
+
+    try {
+      aiExplanation = await generateMovieInsights(firstFive);
+    } catch (aiError) {
+      console.error("AI error:", aiError.message);
+    }
+
+    return res.status(200).json({
+      movies: firstFive,
+      aiExplanation
     });
 
-    console.log(req.body);
-    console.log(req.genreId);
   } catch (error) {
 
-    console.error("ERROR:", error.message);
+    console.error("Controller error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error"
     });
 
   }
-}
+};
