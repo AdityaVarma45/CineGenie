@@ -1,52 +1,96 @@
 import { useState } from "react";
 
-export default function MovieForm({ onSearch }) {
+const genres = [
+  "action", "comedy", "drama", "thriller", "horror",
+  "romance", "animation", "adventure", "crime", "science fiction"
+];
 
-  const [genre, setGenre] = useState("");
+const languages = [
+  { label: "English",   value: "en" },
+  { label: "Hindi",     value: "hi" },
+  { label: "Telugu",    value: "te" },
+  { label: "Tamil",     value: "ta" },
+  { label: "Malayalam", value: "ml" },
+  { label: "Kannada",   value: "kn" },
+];
+
+const currentYear = new Date().getFullYear();
+const years = Array.from({ length: 25 }, (_, i) => currentYear - i);
+
+export default function MovieForm({ onSearch }) {
+  const [genre,    setGenre]    = useState("");
   const [language, setLanguage] = useState("");
-  const [year, setYear] = useState("");
+  const [year,     setYear]     = useState("");
+  const [error,    setError]    = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!genre || !language) {
-      alert("Genre and language required");
+      setError("▸ SELECT GENRE + LANGUAGE TO CONTINUE");
       return;
     }
-
+    setError("");
     onSearch({ genre, language, year });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="form-panel">
+      <form onSubmit={handleSubmit}>
+        <div className="form-grid">
+          {/* Genre */}
+          <div className="form-field">
+            <label className="form-label">Genre</label>
+            <select
+              value={genre}
+              onChange={(e) => { setGenre(e.target.value); setError(""); }}
+              className="form-select"
+            >
+              <option value="">— Select —</option>
+              {genres.map((g) => (
+                <option key={g} value={g}>
+                  {g.charAt(0).toUpperCase() + g.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <input
-        placeholder="Genre (action, comedy...)"
-        value={genre}
-        onChange={(e) => setGenre(e.target.value)}
-        className="border p-2 w-full"
-      />
+          {/* Language */}
+          <div className="form-field">
+            <label className="form-label">Language</label>
+            <select
+              value={language}
+              onChange={(e) => { setLanguage(e.target.value); setError(""); }}
+              className="form-select"
+            >
+              <option value="">— Select —</option>
+              {languages.map((l) => (
+                <option key={l.value} value={l.value}>{l.label}</option>
+              ))}
+            </select>
+          </div>
 
-      <input
-        placeholder="Language (en, hi...)"
-        value={language}
-        onChange={(e) => setLanguage(e.target.value)}
-        className="border p-2 w-full"
-      />
+          {/* Year */}
+          <div className="form-field">
+            <label className="form-label">Year</label>
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="form-select"
+            >
+              <option value="">Any Year</option>
+              {years.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-      <input
-        placeholder="Year (optional)"
-        value={year}
-        onChange={(e) => setYear(e.target.value)}
-        className="border p-2 w-full"
-      />
+        {error && <p className="error-msg">{error}</p>}
 
-      <button
-        className="bg-black text-white px-4 py-2"
-      >
-        Get Recommendations
-      </button>
-
-    </form>
+        <button type="submit" className="btn-search">
+          ⬡ Initiate Search
+        </button>
+      </form>
+    </div>
   );
 }

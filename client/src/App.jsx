@@ -4,52 +4,128 @@ import MovieList from "./components/MovieList";
 import AIExplanation from "./components/AIExplanation";
 import { fetchMovies, fetchNextMovies } from "./api/movieApi";
 
-export default function App() {
+/* Film strip ticker content */
+const TICKER_ITEMS = [
+  "Action",
+  "Drama",
+  "Thriller",
+  "Sci-Fi",
+  "Horror",
+  "Romance",
+  "Animation",
+  "Adventure",
+  "Crime",
+  "Comedy",
+  "Mystery",
+  "Fantasy",
+  "Documentary",
+  "Noir",
+  "Cyberpunk",
+];
 
+function FilmStrip() {
+  const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
+
+  return (
+    <div className="film-strip-wrapper">
+      <div className="film-strip">
+        {doubled.map((item, i) => (
+          <>
+            <span className="film-hole" key={"hole-${i}"} />
+            <span className="film-frame" key={"frame-${i}"}>
+              {item}
+            </span>
+          </>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
   const [movies, setMovies] = useState([]);
   const [aiText, setAiText] = useState("");
   const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  /* Search Movies */
   const handleSearch = async (data) => {
+    setLoading(true);
 
-    const res = await fetchMovies(data);
+    /* clear previous results */
+    setMovies([]);
+    setAiText("");
+    setHasMore(false);
 
-    setMovies(res.movies);
-    setAiText(res.aiExplanation);
-    setHasMore(res.hasMore);
+    try {
+      const res = await fetchMovies(data);
+
+      if (!res) return;
+
+      setMovies(res.movies || []);
+      setAiText(res.aiExplanation || "");
+      setHasMore(res.hasMore || false);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  /* Next 5 Movies */
   const handleNext = async () => {
+    setLoading(true);
 
-    const res = await fetchNextMovies();
+    try {
+      const res = await fetchNextMovies();
 
-    setMovies(res.movies);
-    setAiText(res.aiExplanation);
-    setHasMore(res.hasMore);
+      setMovies(res.movies || []);
+      setAiText(res.aiExplanation || "");
+      setHasMore(res.hasMore || false);
+    } catch (error) {
+      console.error("Next error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const showEmpty = !loading && movies.length === 0 && !aiText;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="app-wrapper">
+      {/* Header */}
+      <header className="app-header">
+        <h1 className="app-title">CineGenie</h1>
+        <p className="app-subtitle">AI-Powered Movie Discovery</p>
+        <span className="title-line" />
+      </header>
 
-      <h1 className="text-3xl font-bold mb-6">
-        CineGenie 🎬
-      </h1>
+      {/* Film Strip */}
+      <FilmStrip />
 
+      {/* Search Form */}
       <MovieForm onSearch={handleSearch} />
 
-      <MovieList movies={movies} />
+      {/* Movie Posters */}
+      <MovieList movies={movies} loading={loading} />
 
+      {/* AI Explanation BELOW movies */}
       <AIExplanation text={aiText} />
 
-      {hasMore && (
-        <button
-          onClick={handleNext}
-          className="mt-6 bg-blue-500 text-white px-4 py-2"
-        >
-          Next 5 Movies
-        </button>
+      {/* Empty State */}
+      {showEmpty && (
+        <div className="empty-state">
+          <span className="empty-icon">🎬</span>
+          Select your preferences above to begin
+        </div>
       )}
 
+      {/* Next 5 Button */}
+      {hasMore && !loading && (
+        <button className="btn-next" onClick={handleNext}>
+          ▶ Next 5 Titles
+        </button>
+      )}
     </div>
   );
 }

@@ -2,22 +2,42 @@ import axios from "axios";
 
 export const fetchMovies = async ({ genreId, language, year }) => {
 
-  let url = `https://api.themoviedb.org/3/discover/movie?api_key=${process.env.TMDB_API_KEY}`;
+const BASE_URL = "https://api.themoviedb.org/3/discover/movie";
 
-  url += `&with_genres=${genreId}`;
-  url += `&with_original_language=${language}`;
-  url += `&sort_by=popularity.desc`;
-  url += `&vote_average.gte=6`;
-  url += `&vote_count.gte=200`;
-  url += `&page=1`;
+let collectedMovies = [];
 
-  if (year) {
-    url += `&primary_release_year=${year}`;
-  }
+for (let page = 1; page <= 10; page++) {
 
-  console.log("TMDB URL:", url);
+let url = `${BASE_URL}?api_key=${process.env.TMDB_API_KEY}`;
 
-  const response = await axios.get(url);
+url += `&with_genres=${genreId}`;
+url += `&sort_by=popularity.desc`;
+url += `&region=IN`;
+url += `&page=${page}`;
 
-  return response.data.results;
+if (year) {
+  url += `&primary_release_year=${year}`;
+}
+
+console.log("TMDB URL:", url);
+
+const response = await axios.get(url);
+
+const results = response.data.results;
+
+/* keep only selected language movies */
+const filtered = results.filter(
+  movie => movie.original_language === language
+);
+
+collectedMovies = [...collectedMovies, ...filtered];
+
+/* stop once we have enough movies */
+if (collectedMovies.length >= 20) {
+  break;
+}
+
+}
+
+return collectedMovies;
 };
