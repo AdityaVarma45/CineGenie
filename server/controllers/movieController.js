@@ -2,47 +2,80 @@ import { fetchMovies } from "../services/tmdbService.js";
 import { generateMovieInsights } from "../services/aiService.js";
 import { genreMap } from "../utils/genreMap.js";
 
+/* simple in-memory cache */
+let movieCache = [];
+let currentIndex = 0;
+
 export const getMovies = async (req, res) => {
   try {
-
     const { genre, language, year } = req.body;
 
     if (!genre || !language) {
       return res.status(400).json({
-        message: "Genre and language are required"
+        message: "Genre and language are required",
       });
     }
 
     const genreId = genreMap[genre.toLowerCase()];
 
-    const movies = await fetchMovies({
-      genreId,
-      language,
-      year
-    });
+    /* fetch movies only if cache empty */
+    if (movieCache.length === 0) {
+      const movies = await fetchMovies({
+        genreId,
+        language,
+        year,
+      });
 
-    const firstFive = movies.slice(0, 5);
-
-    let aiExplanation = "AI explanation unavailable";
-
-    try {
-      aiExplanation = await generateMovieInsights(firstFive);
-    } catch (aiError) {
-      console.error("AI error:", aiError.message);
+      movieCache = movies.slice(0, 20);
+      currentIndex = 0;
     }
 
-    return res.status(200).json({
-      movies: firstFive,
-      aiExplanation
-    });
+    /* get next 5 movies */
+    const nextMovies = movieCache.slice(currentIndex, currentIndex + 5);
 
+    currentIndex += 5;
+
+    const aiExplanation = await generateMovieInsights(nextMovies);
+
+    res.json({
+      movies: nextMovies,
+      aiExplanation,
+      hasMore: currentIndex < movieCache.length,
+    });
   } catch (error) {
+    console.error(error);
 
-    console.error("Controller error:", error.message);
-
-    return res.status(500).json({
-      message: "Server error"
+    res.status(500).json({
+      message: "Server error",
     });
+  }
+};
 
+export const getNextMovies = async (req, res) => {
+  try {
+    if (currentIndex >= movieCache.length) {
+      return res.json({
+        movies: [],
+        message: "No more movies",
+      });
+    }
+
+    const nextMovies = movieCache.slice(currentIndex, currentIndex + 5);
+
+    currentIndex += 5;
+
+    const aiExplanation = await generateMovieInsights(nextMovies);
+
+    res.json({
+      movies: nextMovies,
+      aiExplanation,
+      hasMore: currentIndex < movieCache.length,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 };
