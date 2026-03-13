@@ -33,13 +33,13 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-### Movie Browsing Interface
+### AI Explanation Output
 
 ![Browsing](https://github.com/user-attachments/assets/4a45885f-951b-4030-8014-9bb37f7be2f4)
 
 ---
 
-### AI Explanation Output
+### Project Structure in Code Editor
 
 ![AI Explanation](https://github.com/user-attachments/assets/c5dcc54c-56fd-470f-8ea7-a4e0f8199588)
 
