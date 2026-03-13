@@ -8,7 +8,7 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 - 🎬 Movie discovery based on **genre, language, and release year**
 - 🤖 AI-powered explanations for movie recommendations
@@ -19,7 +19,7 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-## 🖼️ Application Screenshots
+##  Application Screenshots
 
 ### Home Page
 
@@ -45,7 +45,7 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-## 🧠 How It Works
+##  How It Works
 
 1. User selects **genre, language, and year filters**
 2. Backend fetches movies from the **TMDB API**
@@ -55,7 +55,7 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - React
@@ -72,7 +72,7 @@ It helps users discover new movies while also providing **AI-generated insights*
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 client
@@ -89,7 +89,7 @@ server
 
 ---
 
-## 🚀 Future Improvements
+##  Future Improvements
 
 - Movie watchlist feature
 - User rating system
